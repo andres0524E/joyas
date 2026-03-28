@@ -11,9 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const carritoFlotante = document.getElementById('carrito-flotante');
             const contadorCarrito = document.getElementById('contador-carrito');
             const btnWhatsapp = document.getElementById('btn-whatsapp');
-            const btnCerrarCarrito = document.getElementById('cerrar-carrito'); // El nuevo botón X
+            const btnCerrarCarrito = document.getElementById('cerrar-carrito'); 
             
-            // EL NUEVO NÚMERO DE TU MAMÁ
+            // NÚMERO DE TU MAMÁ
             const numeroTelefono = "527711395823"; 
 
             for (let i = 1; i <= maxFotosPosibles; i++) {
@@ -73,24 +73,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // --- LÓGICA PARA EL BOTÓN "X" ---
             btnCerrarCarrito.addEventListener('click', () => {
-                carritoDeCompras = []; // Vaciamos la lista de compras
-                // Le quitamos el marco dorado a todas las fotos seleccionadas
+                carritoDeCompras = []; 
                 document.querySelectorAll('.foto-joya.seleccionada').forEach(img => {
                     img.classList.remove('seleccionada'); 
                 });
-                actualizarVistaCarrito(); // Ocultamos la barra flotante
+                actualizarVistaCarrito(); 
             });
 
-            // --- LÓGICA PARA EL BOTÓN WHATSAPP ---
+            // --- LÓGICA PARA EL BOTÓN WHATSAPP (Con emojis corregidos) ---
             btnWhatsapp.addEventListener('click', () => {
                 carritoDeCompras.sort((a, b) => a - b);
                 
-                // EL NUEVO MENSAJE CON EMOJIS
-                let mensajeNormal = `¡Hola! Me encantó el nuevo catálogo. Y quiero las siguientes joyas 💍:\n\n`;
+                // Mensaje con Unicode para evitar símbolos raros
+                let mensajeNormal = `¡Hola! Me encantó el nuevo catálogo. Y quiero las siguientes joyas \u{1F48D}:\n\n`;
+                
                 carritoDeCompras.forEach(numero => {
                     mensajeNormal += `- *Joya #${numero}*\n`;
                 });
-                mensajeNormal += `\n¿Me podrías dar información y precios por favor? 💖`;
+                
+                mensajeNormal += `\n¿Me podrías dar información y precios por favor? \u{1F496}`;
 
                 const mensajeCodificado = encodeURIComponent(mensajeNormal);
                 const linkWhatsapp = `https://wa.me/${numeroTelefono}?text=${mensajeCodificado}`;
