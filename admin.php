@@ -5,9 +5,11 @@ session_start();
 $usuario_secreto = "ElydaRI";
 $contrasena_secreta = "eraigam07"; 
 
+// --- CIERRE DE SESIÓN BLINDADO ---
 if (isset($_GET['salir'])) {
-    session_destroy();
-    header("Location: admin.php");
+    session_unset();    // Vacía la memoria
+    session_destroy();  // Destruye la sesión
+    header("Location: admin.php"); // Redirige
     exit;
 }
 
@@ -28,7 +30,9 @@ if (isset($_GET['recuperar'])) {
     $mensaje_recuperar = "Por seguridad, contacta a tu desarrollador para restablecer la contraseña.";
 }
 
-// Bloqueo: Pantalla de Login
+// ==========================================
+// PANTALLA DE LOGIN
+// ==========================================
 if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 ?>
 <!DOCTYPE html>
@@ -38,7 +42,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Seguro - Lunae</title>
     
-    <link rel="icon" type="image/png" href="https://icons.iconarchive.com/icons/google/noto-emoji-animals-nature/256/22216-crescent-moon-icon.png">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=2">
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -70,7 +74,9 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 exit; 
 endif;
 
-// --- PANEL PROTEGIDO ---
+// ==========================================
+// PANEL PROTEGIDO (Ya logueado)
+// ==========================================
 $carpeta_img = 'assets/img/';
 $archivo_datos = 'assets/js/datos.json';
 
@@ -124,7 +130,7 @@ $total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Lunae - <?php echo $_SESSION['usuario']; ?></title>
     
-    <link rel="icon" type="image/png" href="https://icons.iconarchive.com/icons/google/noto-emoji-animals-nature/256/22216-crescent-moon-icon.png">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=2">
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
