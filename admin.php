@@ -1,65 +1,129 @@
 <?php
-// admin.php - Panel exclusivo para tu mamá
+// Configuración
+$carpeta_img = 'assets/img/';
+$archivo_datos = 'assets/js/datos.json';
 
-$carpeta_destino = 'assets/img/';
-$archivo_datos = 'assets/js/datos.json'; // Ahora usaremos un .json, es más fácil para PHP
+// Si el archivo JSON no existe por alguna razón, lo creamos
+if (!file_exists($archivo_datos)) {
+    file_put_contents($archivo_datos, '[]');
+}
 
-// 1. ¿Tu mamá presionó el botón de subir nuevo catálogo?
+// 1. LÓGICA: Cuando tu mamá sube un nuevo catálogo
 if (isset($_POST['subir_catalogo'])) {
-    
-    // A. Borramos las fotos viejas del servidor
-    $fotos_viejas = glob($carpeta_destino . '*');
-    foreach($fotos_viejas as $foto) {
-        if(is_file($foto)) {
-            unlink($foto); 
+    // A) Borramos las fotos viejas
+    $fotos_viejas = glob($carpeta_img . '*');
+    foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
+
+    // B) Reiniciamos las ventas a cero
+    file_put_contents($archivo_datos, '[]');
+
+    // C) Procesamos las fotos nuevas, les ponemos 1.jpg, 2.jpg...
+    $contador = 1;
+    if(isset($_FILES['fotos'])) {
+        $total = count($_FILES['fotos']['name']);
+        for($i = 0; $i < $total; $i++) {
+            $tmp = $_FILES['fotos']['tmp_name'][$i];
+            if ($tmp != ""){
+                $ext = strtolower(pathinfo($_FILES['fotos']['name'][$i], PATHINFO_EXTENSION));
+                // Si es un formato válido
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'heic'])) {
+                    $nuevo_nombre = $carpeta_img . $contador . '.' . $ext;
+                    move_uploaded_file($tmp, $nuevo_nombre);
+                    $contador++;
+                }
+            }
         }
     }
+    $mensaje_exito = "¡Catálogo subido con éxito! Se procesaron " . ($contador - 1) . " fotos.";
+}
 
-    // B. Reiniciamos la lista de joyas vendidas (Catálogo nuevo = Todo disponible)
-    file_put_contents($archivo_datos, json_encode([]));
-
-    // C. Procesamos las fotos nuevas y las renombramos
-    $contador = 1;
-    foreach ($_FILES['imagenes']['tmp_name'] as $key => $tmp_name) {
-        // Extraemos el formato original (jpg, jpeg, png)
-        $nombre_original = $_FILES['imagenes']['name'][$key];
-        $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
-        
-        // Creamos el nuevo nombre (1.jpg, 2.jpg...)
-        $nuevo_nombre = $contador . '.' . $extension;
-        $ruta_final = $carpeta_destino . $nuevo_nombre;
-        
-        // Movemos la foto al servidor
-        move_uploaded_file($tmp_name, $ruta_final);
-        $contador++;
+// 2. LÓGICA INVISIBLE: Cuando ella toca una foto para marcarla vendida
+if (isset($_GET['marcar_vendida'])) {
+    $id_joya = (int)$_GET['marcar_vendida'];
+    $vendidas = json_decode(file_get_contents($archivo_datos), true);
+    
+    // Si la joya ya estaba vendida, la quitamos de la lista. Si no, la agregamos.
+    if (($key = array_search($id_joya, $vendidas)) !== false) {
+        unset($vendidas[$key]);
+    } else {
+        $vendidas[] = $id_joya;
     }
     
-    $mensaje = "¡Éxito! El nuevo catálogo se ha subido y las ventas se han reiniciado.";
+    // Guardamos los cambios
+    file_put_contents($archivo_datos, json_encode(array_values($vendidas)));
+    exit; // Terminamos aquí porque es una acción invisible
 }
+
+// Leemos las ventas actuales para mostrarlas en la pantalla
+$joyas_vendidas = json_decode(file_get_contents($archivo_datos), true);
+$total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE));
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
-    </head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; text-align: center; }
+        .tarjeta { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto 30px; }
+        .btn-subir { background-color: #D4AF37; color: black; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.2em; font-weight: bold; cursor: pointer; }
+        .mensaje { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .galeria { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .foto-admin { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 3px solid transparent; transition: 0.3s; }
+        .foto-admin.vendida { border-color: red; opacity: 0.5; transform: scale(0.9); }
+    </style>
+</head>
 <body>
-    <h1>Panel de Control de Mamá 👑</h1>
-    
-    <?php if(isset($mensaje)) echo "<p><strong>$mensaje</strong></p>"; ?>
 
-    <h2>1. Subir Nuevo Catálogo</h2>
-    <p>Sube todas las fotos nuevas. Esto borrará el catálogo anterior y pondrá todo como "Disponible".</p>
-    
-    <form action="admin.php" method="POST" enctype="multipart/form-data">
-        <input type="file" name="imagenes[]" multiple accept="image/*" required>
-        <button type="submit" name="subir_catalogo">Subir Catálogo Completo</button>
-    </form>
+    <h1>👑 Panel de Control - Joyería</h1>
 
-    <hr>
+    <?php if(isset($mensaje_exito)) echo "<div class='mensaje'>$mensaje_exito</div>"; ?>
 
-    <h2>2. Marcar Joyas Vendidas</h2>
-    <p>Toca la foto de la joya que ya se vendió.</p>
-    </body>
+    <div class="tarjeta">
+        <h2>1. Subir Nuevo Catálogo</h2>
+        <p>Selecciona todas las fotos nuevas de tu celular. <b>Esto borrará el catálogo anterior.</b></p>
+        <form action="admin.php" method="POST" enctype="multipart/form-data">
+            <input type="file" name="fotos[]" multiple accept="image/*" required style="margin-bottom: 20px;">
+            <br>
+            <button type="submit" name="subir_catalogo" class="btn-subir">Subir Fotos y Reiniciar</button>
+        </form>
+    </div>
+
+    <div class="tarjeta" style="max-width: 900px;">
+        <h2>2. Marcar Joyas Vendidas</h2>
+        <p>Toca la foto de la joya que ya se vendió (se pondrá roja). Los cambios se guardan solos.</p>
+        
+        <div class="galeria">
+            <?php
+            // Generamos las fotos que haya actualmente en la carpeta
+            for ($i = 1; $i <= $total_fotos_actuales; $i++) {
+                // Buscamos si existe la foto en jpg, jpeg o png
+                $ruta = "";
+                if (file_exists($carpeta_img . $i . '.jpg')) $ruta = $carpeta_img . $i . '.jpg';
+                elseif (file_exists($carpeta_img . $i . '.jpeg')) $ruta = $carpeta_img . $i . '.jpeg';
+                elseif (file_exists($carpeta_img . $i . '.png')) $ruta = $carpeta_img . $i . '.png';
+
+                if ($ruta != "") {
+                    $clase_vendida = in_array($i, $joyas_vendidas) ? "vendida" : "";
+                    echo "<img src='$ruta' class='foto-admin $clase_vendida' onclick='marcarVendida(this, $i)'>";
+                }
+            }
+            ?>
+        </div>
+    </div>
+
+    <script>
+        // Magia para que tu mamá no tenga que recargar la página al tocar una foto
+        function marcarVendida(elementoImg, numeroJoya) {
+            // Llama a PHP en secreto
+            fetch('admin.php?marcar_vendida=' + numeroJoya)
+            .then(() => {
+                // Cambia el diseño de la foto inmediatamente
+                elementoImg.classList.toggle('vendida');
+            });
+        }
+    </script>
+</body>
 </html>
