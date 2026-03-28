@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btnWhatsapp = document.getElementById('btn-whatsapp');
             const btnCerrarCarrito = document.getElementById('cerrar-carrito'); 
             
-            // NÚMERO DE TU MAMÁ
+            // EL NÚMERO DE TU MAMÁ
             const numeroTelefono = "527711395823"; 
 
             for (let i = 1; i <= maxFotosPosibles; i++) {
@@ -73,25 +73,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // --- LÓGICA PARA EL BOTÓN "X" ---
             btnCerrarCarrito.addEventListener('click', () => {
-                carritoDeCompras = []; 
+                carritoDeCompras = []; // Vaciamos la lista de compras
+                // Le quitamos el marco dorado a todas las fotos seleccionadas
                 document.querySelectorAll('.foto-joya.seleccionada').forEach(img => {
                     img.classList.remove('seleccionada'); 
                 });
-                actualizarVistaCarrito(); 
+                actualizarVistaCarrito(); // Ocultamos la barra flotante
             });
 
-            // --- LÓGICA PARA EL BOTÓN WHATSAPP (Con emojis corregidos) ---
+            // --- LÓGICA PARA EL BOTÓN WHATSAPP ---
             btnWhatsapp.addEventListener('click', () => {
                 carritoDeCompras.sort((a, b) => a - b);
                 
-                // Mensaje con Unicode para evitar símbolos raros
-                let mensajeNormal = `¡Hola! Me encantó el nuevo catálogo. Y quiero las siguientes joyas \u{1F48D}:\n\n`;
+                // EL NUEVO MENSAJE SIN EMOJIS
+                let mensajeNormal = `¡Hola! Me encantó el nuevo catálogo. Y quiero las siguientes joyas:\n\n`;
                 
                 carritoDeCompras.forEach(numero => {
                     mensajeNormal += `- *Joya #${numero}*\n`;
                 });
                 
-                mensajeNormal += `\n¿Me podrías dar información y precios por favor? \u{1F496}`;
+                mensajeNormal += `\n¿Me podrías dar información y precios por favor?`;
 
                 const mensajeCodificado = encodeURIComponent(mensajeNormal);
                 const linkWhatsapp = `https://wa.me/${numeroTelefono}?text=${mensajeCodificado}`;

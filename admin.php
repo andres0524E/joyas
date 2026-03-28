@@ -37,7 +37,9 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Seguro - Lunae</title>
-    <link rel="icon" type="image/png" href="fiveicon.png">
+    
+    <link rel="icon" type="image/png" href="https://icons.iconarchive.com/icons/google/noto-emoji-animals-nature/256/22216-crescent-moon-icon.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;}
@@ -121,7 +123,9 @@ $total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Lunae - <?php echo $_SESSION['usuario']; ?></title>
-    <link rel="icon" type="image/png" href="fiveicon.png">
+    
+    <link rel="icon" type="image/png" href="https://icons.iconarchive.com/icons/google/noto-emoji-animals-nature/256/22216-crescent-moon-icon.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #333333; padding: 10px; text-align: center; margin: 0; }
