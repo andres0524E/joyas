@@ -151,7 +151,7 @@ body {
     #carrito-flotante { bottom: 30px; right: 30px; padding: 15px 25px; gap: 20px; }
 }
 
-#carrito-flotante p { color: #333333; font-size: 0.9em; }
+#carrito-flotante p { color: #333333; font-size: 0.9em; margin: 0; }
 
 @media (min-width: 768px) {
     #carrito-flotante p { font-size: 1em; }
@@ -180,3 +180,17 @@ body {
 }
 
 #btn-whatsapp:hover { background-color: #D4AF37; }
+
+/* --- DISEÑO DEL BOTÓN DE CANCELAR (X) --- */
+#cerrar-carrito {
+    cursor: pointer;
+    color: #B76E79; 
+    font-size: 1.2em;
+    font-weight: bold;
+    padding-right: 10px;
+    transition: color 0.3s ease;
+}
+
+#cerrar-carrito:hover {
+    color: #D4AF37; 
+}
