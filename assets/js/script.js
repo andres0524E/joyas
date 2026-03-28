@@ -1,11 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // 1. LEEMOS LA BASE DE DATOS DE HOSTINGER PRIMERO (Evitando la caché)
+    // Leemos la BD de Hostinger (evitando caché con el timestamp)
     fetch('assets/js/datos.json?t=' + new Date().getTime())
         .then(respuesta => respuesta.json())
         .then(joyasVendidas => {
             
-            // 2. UNA VEZ QUE TENEMOS LOS DATOS, CONSTRUIMOS LA GALERÍA
             const maxFotosPosibles = 200; 
             const contenedor = document.getElementById('contenedor-galeria');
             let carritoDeCompras = []; 
@@ -34,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 };
 
-                // Comparamos con la lista que nos dio el servidor
                 const esVendida = joyasVendidas.includes(i);
 
                 if (esVendida) {
@@ -72,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             btnWhatsapp.addEventListener('click', () => {
                 carritoDeCompras.sort((a, b) => a - b);
-                let mensajeNormal = `¡Hola! Me encantó tu catálogo. Me interesan las siguientes joyas:\n\n`;
+                let mensajeNormal = `¡Hola! Me encantó tu catálogo de Lunae. Me interesan las siguientes joyas:\n\n`;
                 carritoDeCompras.forEach(numero => {
                     mensajeNormal += `- *Joya #${numero}*\n`;
                 });

@@ -1,9 +1,4 @@
-/* --- RESETEO BÁSICO --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Montserrat', sans-serif;
@@ -12,51 +7,46 @@ body {
     min-height: 100vh;
 }
 
-/* --- DISEÑO DEL ENCABEZADO RESPONSIVO --- */
 .encabezado-lujo {
     text-align: center;
     padding: 30px 20px;
     background-color: #ffffff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border-bottom: 2px solid #B76E79; /* Rosa Gold */
+    border-bottom: 2px solid #B76E79; 
 }
 
 .encabezado-lujo h1 {
-    font-family: 'Cinzel', serif; /* Cinzel para el título Lunae */
-    font-size: 3em; /* Ajustado para responsividad */
+    font-family: 'Cinzel', serif; 
+    font-size: 3em; 
     font-weight: 400;
     letter-spacing: 4px;
-    color: #D4AF37; /* Título Dorado */
+    color: #D4AF37; 
     text-transform: uppercase;
     margin-bottom: 5px;
 }
 
 .encabezado-lujo p {
     font-family: 'Montserrat', sans-serif;
-    color: #B76E79; /* Subtítulo Rosa Gold */
+    color: #B76E79; 
     font-size: 1em;
     letter-spacing: 2px;
     font-weight: 400;
 }
 
-/* MEDIA QUERY: Títulos más grandes en pantallas grandes */
 @media (min-width: 768px) {
     .encabezado-lujo h1 { font-size: 4em; letter-spacing: 6px; }
     .encabezado-lujo p { font-size: 1.1em; letter-spacing: 3px; }
 }
 
-/* --- DISEÑO DE LA GALERÍA RESPONSIVA --- */
 .galeria {
     display: grid;
-    /* Ajuste responsivo: columnas automáticas, min 150px en móvil, max 1fr */
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px; /* Menos espacio en móvil */
+    gap: 20px; 
     padding: 30px 20px;
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* MEDIA QUERY: Más espacio y columnas más grandes en escritorio */
 @media (min-width: 768px) {
     .galeria {
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -65,13 +55,11 @@ body {
     }
 }
 
-.contenedor-joya {
-    position: relative;
-}
+.contenedor-joya { position: relative; }
 
 .foto-joya {
     width: 100%;
-    height: 200px; /* Altura más baja para móvil */
+    height: 200px; 
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid #eeeeee;
@@ -80,19 +68,16 @@ body {
     cursor: pointer;
 }
 
-/* MEDIA QUERY: Altura más alta en escritorio */
 @media (min-width: 768px) {
     .foto-joya { height: 280px; }
 }
 
-/* Efecto al pasar el cursor (hover) */
 .foto-joya:hover {
     transform: scale(1.03) translateY(-8px);
     box-shadow: 0 15px 30px rgba(183, 110, 121, 0.25);
     border-color: #B76E79;
 }
 
-/* --- DISEÑO DE JOYA SELECCIONADA (CARRITO) --- */
 .foto-joya.seleccionada {
     border-color: #D4AF37;
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
@@ -101,7 +86,6 @@ body {
     outline: 2px solid #D4AF37;
 }
 
-/* --- DISEÑO DE JOYA VENDIDA --- */
 .foto-joya.agotada {
     filter: grayscale(100%) brightness(90%);
     opacity: 0.6;
@@ -129,15 +113,13 @@ body {
     font-size: 1em;
     border-radius: 2px;
     pointer-events: none;
-    white-space: nowrap; /* Evita que el texto se parta en móvil */
+    white-space: nowrap; 
 }
 
-/* MEDIA QUERY: Texto más grande en escritorio */
 @media (min-width: 768px) {
     .letrero-vendida { font-size: 1.2em; letter-spacing: 3px; padding: 10px 20px; }
 }
 
-/* --- DISEÑO DEL PIE DE PÁGINA --- */
 .pie-pagina {
     text-align: center;
     padding: 30px 20px;
@@ -148,14 +130,13 @@ body {
 
 .pie-pagina p { color: #aaaaaa; font-size: 0.9em; letter-spacing: 1px; }
 
-/* --- DISEÑO DEL CARRITO FLOTANTE RESPONSIVO --- */
 #carrito-flotante {
     position: fixed;
-    bottom: 20px; /* Más cerca del borde en móvil */
+    bottom: 20px; 
     right: 20px;
     background-color: #ffffff;
     border: 2px solid #D4AF37;
-    padding: 10px 20px; /* Más compacto en móvil */
+    padding: 10px 20px; 
     border-radius: 50px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     display: flex;
@@ -163,17 +144,15 @@ body {
     gap: 15px;
     transition: all 0.4s ease;
     z-index: 1000;
-    max-width: 90%; /* Evita que se salga en pantallas pequeñas */
+    max-width: 90%; 
 }
 
-/* MEDIA QUERY: Más espacio y posición en escritorio */
 @media (min-width: 768px) {
     #carrito-flotante { bottom: 30px; right: 30px; padding: 15px 25px; gap: 20px; }
 }
 
 #carrito-flotante p { color: #333333; font-size: 0.9em; }
 
-/* MEDIA QUERY: Texto normal en escritorio */
 @media (min-width: 768px) {
     #carrito-flotante p { font-size: 1em; }
 }
@@ -183,10 +162,10 @@ body {
 }
 
 #btn-whatsapp {
-    background-color: #B76E79; /* Rosa Gold */
+    background-color: #B76E79; 
     color: #ffffff;
     border: none;
-    padding: 10px 20px; /* Más compacto en móvil */
+    padding: 10px 20px; 
     border-radius: 30px;
     font-size: 0.9em;
     font-weight: 700;
@@ -196,11 +175,8 @@ body {
     white-space: nowrap;
 }
 
-/* MEDIA QUERY: Botón normal en escritorio */
 @media (min-width: 768px) {
     #btn-whatsapp { padding: 12px 24px; font-size: 1em; }
 }
 
-#btn-whatsapp:hover {
-    background-color: #D4AF37; /* Dorado al pasar el mouse */
-}
+#btn-whatsapp:hover { background-color: #D4AF37; }
