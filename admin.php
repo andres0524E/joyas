@@ -65,14 +65,18 @@ $total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; text-align: center; }
-        .tarjeta { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto 30px; }
-        .btn-subir { background-color: #D4AF37; color: black; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.2em; font-weight: bold; cursor: pointer; }
-        .mensaje { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+<style>
+        body { font-family: 'Arial', sans-serif; background-color: #0a0a0a; color: #E0BFB8; padding: 20px; text-align: center; }
+        h1 { color: #D4AF37; letter-spacing: 2px; }
+        h2 { color: #B76E79; }
+        p { color: #cccccc; }
+        .tarjeta { background: #111111; padding: 20px; border-radius: 10px; border: 1px solid #B76E79; box-shadow: 0 4px 15px rgba(0,0,0,0.5); max-width: 600px; margin: 0 auto 30px; }
+        .btn-subir { background-color: #D4AF37; color: black; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-subir:hover { background-color: #B76E79; }
+        .mensaje { background-color: rgba(212, 175, 55, 0.2); color: #D4AF37; border: 1px solid #D4AF37; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .galeria { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
         .foto-admin { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 3px solid transparent; transition: 0.3s; }
-        .foto-admin.vendida { border-color: red; opacity: 0.5; transform: scale(0.9); }
+        .foto-admin.vendida { border-color: #D4AF37; opacity: 0.3; transform: scale(0.9); }
     </style>
 </head>
 <body>

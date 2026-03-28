@@ -7,37 +7,38 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #ffffff 0%, #f4f4f4 100%);
-    color: #333333;
+    background-color: #ffffff; /* Fondo Blanco Limpio */
+    color: #333333; /* Texto oscuro para que se lea bien */
     min-height: 100vh;
 }
 
-/* --- DISEÑO DEL ENCABEZADO (Estilo Tiffany) --- */
+/* --- DISEÑO DEL ENCABEZADO --- */
 .encabezado-lujo {
     text-align: center;
-    padding: 60px 20px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border-bottom: 2px solid #333333; /* Línea negra para más elegancia */
+    /* Reduje el padding de 60px a 30px para que la línea suba y quede pegada */
+    padding: 30px 20px; 
+    background-color: #ffffff; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); /* Sombra muy sutil */
+    border-bottom: 2px solid #B76E79; /* Línea Rosa Gold */
 }
 
 .encabezado-lujo h1 {
-    font-family: 'Bodoni Moda', serif; /* LA NUEVA FUENTE */
-    font-size: 3.5em; /* Un poco más grande */
+    font-family: 'Bodoni Moda', serif;
+    font-size: 4em; /* Letra un poco más grande */
     font-weight: 400;
-    letter-spacing: 2px;
-    color: #000000; /* Negro profundo como las marcas de lujo */
+    letter-spacing: 4px;
+    color: #D4AF37; /* Título Dorado */
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 5px; /* Más pegado al subtítulo */
 }
 
 .encabezado-lujo p {
     font-family: 'Montserrat', sans-serif;
-    color: #666666;
-    font-size: 1em;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    font-weight: 300;
+    color: #B76E79; /* Subtítulo Rosa Gold */
+    font-size: 1.1em;
+    letter-spacing: 3px;
+    font-weight: 400;
+    font-style: italic; /* Le da un toque muy elegante a las comillas */
 }
 
 /* --- DISEÑO DE LA GALERÍA --- */
@@ -50,9 +51,8 @@ body {
     margin: 0 auto;
 }
 
-/* NUEVO: Contenedor individual para cada joya */
 .contenedor-joya {
-    position: relative; /* Importante para que el letrero se quede dentro de la foto */
+    position: relative;
 }
 
 .foto-joya {
@@ -60,40 +60,40 @@ body {
     height: 280px;
     object-fit: cover;
     border-radius: 4px;
-    border: 8px solid #ffffff; 
+    border: 1px solid #eeeeee; /* Borde gris muy clarito */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); 
-    outline: 1px solid #e5e5e5;
     transition: all 0.4s ease;
     cursor: pointer;
 }
 
+/* Efecto al pasar el cursor */
 .foto-joya:hover {
     transform: scale(1.03) translateY(-8px);
-    box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3);
-    outline-color: #D4AF37;
+    box-shadow: 0 15px 30px rgba(183, 110, 121, 0.25); /* Sombra Rosa Gold */
+    border-color: #B76E79;
 }
 
-/* --- DISEÑO DEL CARRITO --- */
+/* --- DISEÑO DE JOYA SELECCIONADA (CARRITO) --- */
 .foto-joya.seleccionada {
-    border-color: #D4AF37;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+    border-color: #D4AF37; 
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
     transform: scale(0.95);
     opacity: 0.9;
     outline: 2px solid #D4AF37;
 }
 
-/* --- NUEVO: DISEÑO DE JOYA VENDIDA --- */
+/* --- DISEÑO DE JOYA VENDIDA --- */
 .foto-joya.agotada {
-    filter: grayscale(100%); /* Pone la foto en blanco y negro */
+    filter: grayscale(100%) brightness(90%); 
     opacity: 0.6;
-    cursor: not-allowed; /* Cambia la manita por un símbolo de bloqueo */
+    cursor: not-allowed;
+    border-color: #dddddd;
 }
 
-/* Evita que haga la animación al pasar el ratón si está vendida */
 .foto-joya.agotada:hover {
     transform: none;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    outline-color: #e5e5e5;
+    box-shadow: none;
+    border-color: #dddddd;
 }
 
 .letrero-vendida {
@@ -101,46 +101,54 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #ffffff;
+    background-color: rgba(212, 175, 55, 0.95); /* Dorado */
+    color: #ffffff; /* Letras blancas */
     padding: 10px 20px;
     font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 3px;
     font-size: 1.2em;
-    border-radius: 4px;
-    pointer-events: none; /* Para que los clics pasen a través del letrero */
+    border-radius: 2px;
+    pointer-events: none;
 }
 
-/* --- DEMÁS ESTILOS (Footer y Botón Flotante) --- */
+/* --- DISEÑO DEL PIE DE PÁGINA --- */
 .pie-pagina {
     text-align: center;
     padding: 30px 20px;
     margin-top: 40px;
     background-color: #ffffff;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #eeeeee;
 }
 
 .pie-pagina p { color: #aaaaaa; font-size: 0.9em; letter-spacing: 1px; }
 
+/* --- DISEÑO DEL CARRITO FLOTANTE --- */
 #carrito-flotante {
     position: fixed; bottom: 30px; right: 30px;
-    background-color: #ffffff; border: 2px solid #D4AF37;
+    background-color: #ffffff; 
+    border: 2px solid #D4AF37; 
     padding: 15px 25px; border-radius: 50px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     display: flex; align-items: center; gap: 20px;
     transition: all 0.4s ease; z-index: 1000;
 }
+
+#carrito-flotante p { color: #333333; }
 
 #carrito-flotante.oculto {
     transform: translateY(150px); opacity: 0; pointer-events: none;
 }
 
 #btn-whatsapp {
-    background-color: #25D366; color: white; border: none;
+    background-color: #B76E79; /* Rosa Gold */
+    color: #ffffff; /* Letras blancas */
+    border: none;
     padding: 12px 24px; border-radius: 30px; font-size: 1em;
-    font-weight: 600; font-family: 'Montserrat', sans-serif;
+    font-weight: 700; font-family: 'Montserrat', sans-serif;
     cursor: pointer; transition: background-color 0.3s ease;
 }
 
-#btn-whatsapp:hover { background-color: #128C7E; }
+#btn-whatsapp:hover { 
+    background-color: #D4AF37; /* Dorado al pasar el mouse */
+}
