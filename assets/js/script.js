@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Obtenemos en paralelo las ventas y el nuevo índice de fotos ultra-rápido
     Promise.all([
         fetch('assets/js/datos.json?t=' + new Date().getTime()).then(res => res.json()),
         fetch('assets/js/catalogo.json?t=' + new Date().getTime()).then(res => res.ok ? res.json() : [])
@@ -8,11 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(([datosServer, catalogoArchivos]) => {
             
             const contenedor = document.getElementById('contenedor-galeria');
-            contenedor.innerHTML = ''; // Limpiamos la galería por si acaso
+            contenedor.innerHTML = ''; 
             
             let carritoDeCompras = []; 
             
-            // Elementos de la interfaz
             const carritoFlotante = document.getElementById('carrito-flotante');
             const contadorCarrito = document.getElementById('contador-carrito');
             const btnWhatsapp = document.getElementById('btn-whatsapp');
@@ -25,19 +23,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const btnAgregarVisor = document.getElementById('btn-visor-agregar');
             let joyaActualEnVisor = 0;
 
-            // EL NÚMERO DE TU MAMÁ
             const numeroTelefono = "527711395823"; 
 
             let joyasVendidas = Array.isArray(datosServer) ? datosServer : (datosServer.vendidas || []);
             let joyasOcultas = datosServer.ocultas || [];
-            
-            // --- NUEVO: Memoria anti-duplicados ---
             let joyasYaRenderizadas = []; 
+
+            // --- ANIMACIÓN ELEGANTE Y SEGURA PARA SAFARI ---
+            const observadorCarga = new IntersectionObserver((entradas) => {
+                entradas.forEach(entrada => {
+                    if (entrada.isIntersecting) {
+                        entrada.target.classList.add('visible');
+                        observadorCarga.unobserve(entrada.target);
+                    }
+                });
+            }, { threshold: 0.05 });
 
             catalogoArchivos.forEach(nombreArchivo => {
                 let i = parseInt(nombreArchivo.split('.')[0]); 
                 
-                // Evitamos duplicados y saltamos las ocultas
                 if(joyasOcultas.includes(i) || joyasYaRenderizadas.includes(i)) return; 
                 joyasYaRenderizadas.push(i);
 
@@ -49,9 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 imagen.alt = `Joya número ${i}`;
                 imagen.dataset.numero = i; 
                 imagen.src = `assets/img/${nombreArchivo}`; 
-                
-                // --- NUEVO: Carga inteligente nativa (No falla en celulares) ---
-                imagen.loading = 'lazy'; 
+                // Safari fix: Eliminamos loading="lazy" ya que los WebP son ultra ligeros
 
                 const esVendida = joyasVendidas.includes(i);
 
@@ -74,9 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 contenedor.appendChild(cajaJoya);
+                observadorCarga.observe(cajaJoya); // Agregamos la foto a la animación
             });
 
-            // --- LÓGICA DEL VISOR ---
             function abrirVisor(rutaImg, numero) {
                 imgVisor.src = rutaImg;
                 joyaActualEnVisor = numero;
@@ -112,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 actualizarVistaCarrito();
             });
 
-            // --- LÓGICA DEL FILTRO ---
             toggleFiltro.addEventListener('change', function() {
                 const todasLasVendidas = document.querySelectorAll('.es-vendida');
                 if (this.checked) {
@@ -122,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            // --- CARRITO Y WHATSAPP ---
             function actualizarVistaCarrito() {
                 contadorCarrito.innerText = carritoDeCompras.length;
                 if (carritoDeCompras.length > 0) { carritoFlotante.classList.remove('oculto'); } 

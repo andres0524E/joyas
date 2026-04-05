@@ -39,7 +39,8 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
     <link rel="icon" type="image/png" href="fiveicon.png?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;}
+        /* FONDO ACTUALIZADO AL CREMA ELEGANTE */
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfaf0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;}
         .tarjeta-login { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; max-width: 400px; width: 100%; border: 1px solid #eeeeee;}
         h1 { color: #D4AF37; margin-bottom: 30px; font-family: 'Cinzel', serif; letter-spacing: 2px;}
         input, button { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 5px; font-size: 1.1em; font-family: 'Montserrat', sans-serif;}
@@ -76,7 +77,6 @@ if (!file_exists($archivo_datos)) {
 
 // Subir Catálogo
 if (isset($_POST['subir_catalogo'])) {
-    // 1. Borrado Ultra Agresivo
     $fotos_viejas = glob($carpeta_img . '*');
     if ($fotos_viejas !== false) {
         foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
@@ -85,7 +85,6 @@ if (isset($_POST['subir_catalogo'])) {
     file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
     $contador = 1;
 
-    // 2. Procesamos lo que subió
     if(isset($_FILES['fotos'])) {
         $total = count($_FILES['fotos']['name']);
         for($i = 0; $i < $total; $i++) {
@@ -147,13 +146,13 @@ if (isset($_GET['accion_joya'])) {
     exit; 
 }
 
-// --- CREACIÓN DEL ÍNDICE (Filtro Anti-Duplicados) ---
+// --- CREACIÓN DEL ÍNDICE ---
 $archivos_galeria = glob($carpeta_img . '*.{jpg,jpeg,png,webp,heic}', GLOB_BRACE);
-if ($archivos_galeria === false) $archivos_galeria = []; // Prevención de errores en Hostinger
+if ($archivos_galeria === false) $archivos_galeria = []; 
 natsort($archivos_galeria);
 
 $catalogo_limpio = [];
-$numeros_vistos = []; // Memoria para evitar dobles
+$numeros_vistos = []; 
 
 foreach($archivos_galeria as $arch) {
     $num = (int)pathinfo($arch, PATHINFO_FILENAME);
@@ -163,7 +162,6 @@ foreach($archivos_galeria as $arch) {
     }
 }
 file_put_contents($archivo_catalogo, json_encode($catalogo_limpio));
-// ---------------------------------------------------
 
 $datos_actuales = json_decode(file_get_contents($archivo_datos), true);
 $joyas_vendidas = $datos_actuales['vendidas'] ?? (is_array($datos_actuales) ? $datos_actuales : []);
@@ -177,12 +175,13 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
     <link rel="icon" type="image/png" href="fiveicon.png?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #333333; padding: 10px; text-align: center; margin: 0; }
+        /* FONDO ACTUALIZADO AL CREMA ELEGANTE */
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfaf0; color: #333333; padding: 10px; text-align: center; margin: 0; }
         .encabezado-panel { position: relative; padding: 20px; }
         h1 { color: #D4AF37; font-family: 'Cinzel', serif; font-size: 2em; margin-bottom: 5px;}
         h2 { color: #B76E79; font-weight: 400; font-size: 1.2em;}
         .btn-salir { background-color: #f1f1f1; color: #333; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 0.9em; position: absolute; top: 10px; right: 10px; font-weight: bold;}
-        .tarjeta { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #eeeeee; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto 20px; }
+        .tarjeta { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #D4AF37; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto 20px; }
         .btn-lujo { background-color: #D4AF37; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-family: 'Montserrat';}
         .btn-lujo:hover { background-color: #B76E79;}
         .btn-secundario { background-color: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; font-family: 'Montserrat';}
@@ -235,7 +234,7 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
                 $clase_oculta = in_array($i, $joyas_ocultas) ? "oculta" : "";
                 echo "<div class='contenedor-foto'>";
                 echo "<span class='etiqueta-numero'>#$i</span>";
-                echo "<img src='$ruta' loading='lazy' class='foto-admin $clase_vendida $clase_oculta' ondblclick='accionJoya(this, $i, \"ocultar\")' onclick='toqueSimple(this, $i)'>";
+                echo "<img src='$ruta' class='foto-admin $clase_vendida $clase_oculta' ondblclick='accionJoya(this, $i, \"ocultar\")' onclick='toqueSimple(this, $i)'>";
                 echo "</div>";
             }
             ?>
