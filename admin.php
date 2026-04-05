@@ -36,7 +36,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Seguro - Lunae</title>
-    <link rel="icon" type="image/png" href="fiveicon.png?v=3">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;}
@@ -64,47 +64,59 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 <?php exit; endif;
 
 // ==========================================
-// PANEL PROTEGIDO (Motor Turbo)
+// PANEL PROTEGIDO (Motor Turbo + Extractor ZIP)
 // ==========================================
 $carpeta_img = 'assets/img/';
 $archivo_datos = 'assets/js/datos.json';
-$archivo_catalogo = 'assets/js/catalogo.json'; // NUEVO ÍNDICE VELOZ
+$archivo_catalogo = 'assets/js/catalogo.json'; 
 
 if (!file_exists($archivo_datos)) {
     file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
 }
 
-// Subir Catálogo
-// C) Procesamos las fotos nuevas y las convertimos a WEBP
-$contador = 1;
-if(isset($_FILES['fotos'])) {
-    $total = count($_FILES['fotos']['name']);
-    for($i = 0; $i < $total; $i++) {
-        $tmp = $_FILES['fotos']['tmp_name'][$i];
-        if ($tmp != ""){
-            $ext = strtolower(pathinfo($_FILES['fotos']['name'][$i], PATHINFO_EXTENSION));
-            $destino_webp = $carpeta_img . $contador . '.webp';
-            
-            // Verificamos si es JPG o PNG para saber cómo procesarla
-            if ($ext === 'jpg' || $ext === 'jpeg') {
-                $imagen_original = imagecreatefromjpeg($tmp);
-            } elseif ($ext === 'png') {
-                $imagen_original = imagecreatefrompng($tmp);
-                // Mantiene las transparencias de los PNG
-                imagepalettetotruecolor($imagen_original);
-                imagealphablending($imagen_original, true);
-                imagesavealpha($imagen_original, true);
-            }
+// Subir Catálogo (¡Ahora soporta ZIP mágico!)
+if (isset($_POST['subir_catalogo'])) {
+    // 1. Borramos todo lo viejo
+    $fotos_viejas = glob($carpeta_img . '*');
+    foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
+    file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
+    $contador = 1;
 
-            // Si se pudo leer la imagen, la convertimos
-            if (isset($imagen_original) && $imagen_original !== false) {
-                // El '80' es la calidad. Pesa poquísimo y se ve perfecta.
-                imagewebp($imagen_original, $destino_webp, 80); 
-                imagedestroy($imagen_original); // Limpiamos la memoria
-                $contador++;
+    // 2. Procesamos lo que subió
+    if(isset($_FILES['fotos'])) {
+        $total = count($_FILES['fotos']['name']);
+        for($i = 0; $i < $total; $i++) {
+            $tmp = $_FILES['fotos']['tmp_name'][$i];
+            $nombre_original = strtolower($_FILES['fotos']['name'][$i]);
+            $ext = pathinfo($nombre_original, PATHINFO_EXTENSION);
+
+            if ($tmp != "") {
+                // SI ES UN ZIP (De la herramienta de PC)
+                if ($ext === 'zip') {
+                    $zip = new ZipArchive;
+                    if ($zip->open($tmp) === TRUE) {
+                        for($j = 0; $j < $zip->numFiles; $j++) {
+                            $nombre_interno = $zip->getNameIndex($j);
+                            $ext_interna = strtolower(pathinfo($nombre_interno, PATHINFO_EXTENSION));
+                            
+                            if (in_array($ext_interna, ['jpg', 'jpeg', 'png', 'webp'])) {
+                                $contenido = $zip->getFromIndex($j);
+                                file_put_contents($carpeta_img . $contador . '.' . $ext_interna, $contenido);
+                                $contador++;
+                            }
+                        }
+                        $zip->close();
+                    }
+                } 
+                // SI SON FOTOS SUELTAS (Soporta webp, jpg, png)
+                elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'heic'])) {
+                    move_uploaded_file($tmp, $carpeta_img . $contador . '.' . $ext);
+                    $contador++;
+                }
             }
         }
     }
+    $mensaje_exito = "¡Catálogo subido! Se procesaron " . ($contador - 1) . " joyas.";
 }
 
 // Limpiar todas las ventas
@@ -135,11 +147,11 @@ if (isset($_GET['accion_joya'])) {
 }
 
 // --- CREACIÓN DEL ÍNDICE DE VELOCIDAD AUTOMÁTICO ---
-$archivos_galeria = glob($carpeta_img . '*.{jpg,jpeg,png,heic}', GLOB_BRACE);
+$archivos_galeria = glob($carpeta_img . '*.{jpg,jpeg,png,webp,heic}', GLOB_BRACE);
 natsort($archivos_galeria);
 $catalogo_limpio = [];
 foreach($archivos_galeria as $arch) {
-    $catalogo_limpio[] = basename($arch); // Guarda nombres exactos (ej: "1.jpg", "2.png")
+    $catalogo_limpio[] = basename($arch);
 }
 file_put_contents($archivo_catalogo, json_encode($catalogo_limpio));
 // ---------------------------------------------------
@@ -153,7 +165,7 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Lunae - <?php echo $_SESSION['usuario']; ?></title>
-    <link rel="icon" type="image/png" href="fiveicon.png?v=3">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #333333; padding: 10px; text-align: center; margin: 0; }
@@ -187,12 +199,12 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
 
     <div class="tarjeta">
         <h3>1. Subir Nuevo Catálogo</h3>
-        <p>Selecciona todas las fotos nuevas. <br><b>⚠️ Borrará el catálogo anterior.</b></p>
+        <p>Puedes seleccionar fotos sueltas o <b>subir directamente el archivo .zip</b> que te da tu Optimizador. <br><b>⚠️ Borrará el catálogo anterior.</b></p>
         <form action="admin.php" method="POST" enctype="multipart/form-data" onsubmit="document.getElementById('indicador-carga').style.display='block';">
-            <input type="file" name="fotos[]" multiple accept="image/*" required style="margin-bottom:15px; width:100%;">
+            <input type="file" name="fotos[]" multiple accept="image/*, .zip" required style="margin-bottom:15px; width:100%;">
             <br>
-            <button type="submit" name="subir_catalogo" class="btn-lujo">Subir Fotos</button>
-            <p id="indicador-carga">⏳ Procesando imágenes, no cierres la ventana...</p>
+            <button type="submit" name="subir_catalogo" class="btn-lujo">Subir y Actualizar</button>
+            <p id="indicador-carga">⏳ Procesando catálogo, no cierres la ventana...</p>
         </form>
     </div>
 
@@ -203,7 +215,6 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
         
         <div class="galeria">
             <?php
-            // Bucle Optimizado sin file_exists
             foreach ($catalogo_limpio as $archivo) {
                 $i = (int)pathinfo($archivo, PATHINFO_FILENAME);
                 $ruta = $carpeta_img . $archivo;
@@ -212,7 +223,6 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
                 $clase_oculta = in_array($i, $joyas_ocultas) ? "oculta" : "";
                 echo "<div class='contenedor-foto'>";
                 echo "<span class='etiqueta-numero'>#$i</span>";
-                // NUEVO: loading="lazy" hace que el panel cargue instantáneo
                 echo "<img src='$ruta' loading='lazy' class='foto-admin $clase_vendida $clase_oculta' ondblclick='accionJoya(this, $i, \"ocultar\")' onclick='toqueSimple(this, $i)'>";
                 echo "</div>";
             }
