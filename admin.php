@@ -1,6 +1,5 @@
 <?php
 // --- 🔒 SEGURIDAD EXTREMA ---
-// 1. La sesión muere al cerrar el navegador
 session_set_cookie_params(0); 
 session_start();
 
@@ -8,7 +7,6 @@ $usuario_secreto = "ElydaRI";
 $contrasena_secreta = "eraigam07"; 
 $tiempo_inactividad = 1800; // 30 minutos
 
-// 2. Control de inactividad
 if (isset($_SESSION['ultimo_acceso']) && (time() - $_SESSION['ultimo_acceso'] > $tiempo_inactividad)) {
     session_unset(); session_destroy();
     header("Location: admin.php?expirado=true");
@@ -16,7 +14,6 @@ if (isset($_SESSION['ultimo_acceso']) && (time() - $_SESSION['ultimo_acceso'] > 
 }
 $_SESSION['ultimo_acceso'] = time();
 
-// Cierre voluntario
 if (isset($_GET['salir'])) {
     session_unset(); session_destroy();
     header("Location: admin.php");
@@ -32,9 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     } else { $error_login = "Usuario o contraseña incorrectos."; }
 }
 
-// ==========================================
-// PANTALLA DE LOGIN
-// ==========================================
 if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 ?>
 <!DOCTYPE html>
@@ -70,71 +64,89 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 <?php exit; endif;
 
 // ==========================================
-// PANEL PROTEGIDO (Nuevas Funciones)
+// PANEL PROTEGIDO (Motor Turbo)
 // ==========================================
 $carpeta_img = 'assets/img/';
 $archivo_datos = 'assets/js/datos.json';
+$archivo_catalogo = 'assets/js/catalogo.json'; // NUEVO ÍNDICE VELOZ
 
-// Formato nuevo de BD (Soporta vendidas y ocultas)
 if (!file_exists($archivo_datos)) {
     file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
 }
 
-// Lógica: Subir Catálogo
-if (isset($_POST['subir_catalogo'])) {
-    $fotos_viejas = glob($carpeta_img . '*');
-    foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
-    file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
-    $contador = 1;
-    if(isset($_FILES['fotos'])) {
-        $total = count($_FILES['fotos']['name']);
-        for($i = 0; $i < $total; $i++) {
-            $tmp = $_FILES['fotos']['tmp_name'][$i];
-            if ($tmp != ""){
-                $ext = strtolower(pathinfo($_FILES['fotos']['name'][$i], PATHINFO_EXTENSION));
-                if (in_array($ext, ['jpg', 'jpeg', 'png', 'heic'])) {
-                    move_uploaded_file($tmp, $carpeta_img . $contador . '.' . $ext);
-                    $contador++;
-                }
+// Subir Catálogo
+// C) Procesamos las fotos nuevas y las convertimos a WEBP
+$contador = 1;
+if(isset($_FILES['fotos'])) {
+    $total = count($_FILES['fotos']['name']);
+    for($i = 0; $i < $total; $i++) {
+        $tmp = $_FILES['fotos']['tmp_name'][$i];
+        if ($tmp != ""){
+            $ext = strtolower(pathinfo($_FILES['fotos']['name'][$i], PATHINFO_EXTENSION));
+            $destino_webp = $carpeta_img . $contador . '.webp';
+            
+            // Verificamos si es JPG o PNG para saber cómo procesarla
+            if ($ext === 'jpg' || $ext === 'jpeg') {
+                $imagen_original = imagecreatefromjpeg($tmp);
+            } elseif ($ext === 'png') {
+                $imagen_original = imagecreatefrompng($tmp);
+                // Mantiene las transparencias de los PNG
+                imagepalettetotruecolor($imagen_original);
+                imagealphablending($imagen_original, true);
+                imagesavealpha($imagen_original, true);
+            }
+
+            // Si se pudo leer la imagen, la convertimos
+            if (isset($imagen_original) && $imagen_original !== false) {
+                // El '80' es la calidad. Pesa poquísimo y se ve perfecta.
+                imagewebp($imagen_original, $destino_webp, 80); 
+                imagedestroy($imagen_original); // Limpiamos la memoria
+                $contador++;
             }
         }
     }
-    $mensaje_exito = "¡Catálogo subido! Se procesaron " . ($contador - 1) . " fotos.";
 }
 
-// Lógica: Limpiar todas las ventas
+// Limpiar todas las ventas
 if (isset($_GET['limpiar_ventas'])) {
     $datos = json_decode(file_get_contents($archivo_datos), true);
-    // Solo borramos las vendidas, las ocultas se quedan ocultas
     $nuevos_datos = ['vendidas' => [], 'ocultas' => $datos['ocultas'] ?? []];
     file_put_contents($archivo_datos, json_encode($nuevos_datos));
     header("Location: admin.php?mensaje=limpio");
     exit;
 }
 
-// Lógica: Comunicación AJAX (Marcar/Ocultar)
+// Comunicación AJAX (Marcar/Ocultar)
 if (isset($_GET['accion_joya'])) {
     $id_joya = (int)$_GET['accion_joya'];
-    $tipo_accion = $_GET['tipo']; // 'vender' o 'ocultar'
+    $tipo_accion = $_GET['tipo'];
     
-    // Leemos la BD, si es vieja la actualizamos al nuevo formato
     $raw_data = json_decode(file_get_contents($archivo_datos), true);
-    if(isset($raw_data[0])) $datos = ['vendidas' => $raw_data, 'ocultas' => []]; // Migración
+    if(isset($raw_data[0])) $datos = ['vendidas' => $raw_data, 'ocultas' => []];
     else $datos = $raw_data;
 
     $lista = &$datos[$tipo_accion === 'vender' ? 'vendidas' : 'ocultas'];
     
-    if (($key = array_search($id_joya, $lista)) !== false) unset($lista[$key]); // Quitar
-    else $lista[] = $id_joya; // Agregar
+    if (($key = array_search($id_joya, $lista)) !== false) unset($lista[$key]);
+    else $lista[] = $id_joya;
 
     file_put_contents($archivo_datos, json_encode(['vendidas' => array_values($datos['vendidas']), 'ocultas' => array_values($datos['ocultas'])]));
     exit; 
 }
 
+// --- CREACIÓN DEL ÍNDICE DE VELOCIDAD AUTOMÁTICO ---
+$archivos_galeria = glob($carpeta_img . '*.{jpg,jpeg,png,heic}', GLOB_BRACE);
+natsort($archivos_galeria);
+$catalogo_limpio = [];
+foreach($archivos_galeria as $arch) {
+    $catalogo_limpio[] = basename($arch); // Guarda nombres exactos (ej: "1.jpg", "2.png")
+}
+file_put_contents($archivo_catalogo, json_encode($catalogo_limpio));
+// ---------------------------------------------------
+
 $datos_actuales = json_decode(file_get_contents($archivo_datos), true);
 $joyas_vendidas = $datos_actuales['vendidas'] ?? (is_array($datos_actuales) ? $datos_actuales : []);
 $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
-$total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -191,36 +203,33 @@ $total_fotos_actuales = count(glob($carpeta_img . '*.{jpg,jpeg,png}', GLOB_BRACE
         
         <div class="galeria">
             <?php
-            for ($i = 1; $i <= $total_fotos_actuales; $i++) {
-                $ruta = "";
-                if (file_exists($carpeta_img . $i . '.jpg')) $ruta = $carpeta_img . $i . '.jpg';
-                elseif (file_exists($carpeta_img . $i . '.jpeg')) $ruta = $carpeta_img . $i . '.jpeg';
-                elseif (file_exists($carpeta_img . $i . '.png')) $ruta = $carpeta_img . $i . '.png';
-
-                if ($ruta != "") {
-                    $clase_vendida = in_array($i, $joyas_vendidas) ? "vendida" : "";
-                    $clase_oculta = in_array($i, $joyas_ocultas) ? "oculta" : "";
-                    echo "<div class='contenedor-foto'>";
-                    echo "<span class='etiqueta-numero'>#$i</span>";
-                    echo "<img src='$ruta' class='foto-admin $clase_vendida $clase_oculta' ondblclick='accionJoya(this, $i, \"ocultar\")' onclick='toqueSimple(this, $i)'>";
-                    echo "</div>";
-                }
+            // Bucle Optimizado sin file_exists
+            foreach ($catalogo_limpio as $archivo) {
+                $i = (int)pathinfo($archivo, PATHINFO_FILENAME);
+                $ruta = $carpeta_img . $archivo;
+                
+                $clase_vendida = in_array($i, $joyas_vendidas) ? "vendida" : "";
+                $clase_oculta = in_array($i, $joyas_ocultas) ? "oculta" : "";
+                echo "<div class='contenedor-foto'>";
+                echo "<span class='etiqueta-numero'>#$i</span>";
+                // NUEVO: loading="lazy" hace que el panel cargue instantáneo
+                echo "<img src='$ruta' loading='lazy' class='foto-admin $clase_vendida $clase_oculta' ondblclick='accionJoya(this, $i, \"ocultar\")' onclick='toqueSimple(this, $i)'>";
+                echo "</div>";
             }
             ?>
         </div>
     </div>
     <script>
-        // Lógica para diferenciar 1 toque de 2 toques (doble clic)
         let temporizador;
         function toqueSimple(elementoImg, numeroJoya) {
             clearTimeout(temporizador);
             temporizador = setTimeout(() => {
                 accionJoya(elementoImg, numeroJoya, 'vender');
-            }, 250); // Si no hay otro toque en 250ms, es un toque simple
+            }, 250);
         }
 
         function accionJoya(elementoImg, numeroJoya, tipo) {
-            clearTimeout(temporizador); // Cancelar toque simple si fue doble
+            clearTimeout(temporizador);
             fetch(`admin.php?accion_joya=${numeroJoya}&tipo=${tipo}`)
             .then(() => {
                 if(tipo === 'vender') elementoImg.classList.toggle('vendida');
