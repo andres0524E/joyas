@@ -36,7 +36,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Seguro - Lunae</title>
-    <link rel="icon" type="image/png" href="fiveicon.png?v=4">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;}
@@ -64,7 +64,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true):
 <?php exit; endif;
 
 // ==========================================
-// PANEL PROTEGIDO (Motor Turbo + Extractor ZIP)
+// PANEL PROTEGIDO (Con Anti-Duplicados)
 // ==========================================
 $carpeta_img = 'assets/img/';
 $archivo_datos = 'assets/js/datos.json';
@@ -74,11 +74,14 @@ if (!file_exists($archivo_datos)) {
     file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
 }
 
-// Subir Catálogo (¡Ahora soporta ZIP mágico!)
+// Subir Catálogo
 if (isset($_POST['subir_catalogo'])) {
-    // 1. Borramos todo lo viejo
+    // 1. Borrado Ultra Agresivo
     $fotos_viejas = glob($carpeta_img . '*');
-    foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
+    if ($fotos_viejas !== false) {
+        foreach($fotos_viejas as $f) { if(is_file($f)) unlink($f); }
+    }
+    
     file_put_contents($archivo_datos, json_encode(['vendidas' => [], 'ocultas' => []]));
     $contador = 1;
 
@@ -91,7 +94,6 @@ if (isset($_POST['subir_catalogo'])) {
             $ext = pathinfo($nombre_original, PATHINFO_EXTENSION);
 
             if ($tmp != "") {
-                // SI ES UN ZIP (De la herramienta Convertidor)
                 if ($ext === 'zip') {
                     $zip = new ZipArchive;
                     if ($zip->open($tmp) === TRUE) {
@@ -108,7 +110,6 @@ if (isset($_POST['subir_catalogo'])) {
                         $zip->close();
                     }
                 } 
-                // SI SON FOTOS SUELTAS (Soporta webp, jpg, png)
                 elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'heic'])) {
                     move_uploaded_file($tmp, $carpeta_img . $contador . '.' . $ext);
                     $contador++;
@@ -146,12 +147,20 @@ if (isset($_GET['accion_joya'])) {
     exit; 
 }
 
-// --- CREACIÓN DEL ÍNDICE DE VELOCIDAD AUTOMÁTICO ---
+// --- CREACIÓN DEL ÍNDICE (Filtro Anti-Duplicados) ---
 $archivos_galeria = glob($carpeta_img . '*.{jpg,jpeg,png,webp,heic}', GLOB_BRACE);
+if ($archivos_galeria === false) $archivos_galeria = []; // Prevención de errores en Hostinger
 natsort($archivos_galeria);
+
 $catalogo_limpio = [];
+$numeros_vistos = []; // Memoria para evitar dobles
+
 foreach($archivos_galeria as $arch) {
-    $catalogo_limpio[] = basename($arch);
+    $num = (int)pathinfo($arch, PATHINFO_FILENAME);
+    if (!in_array($num, $numeros_vistos)) {
+        $numeros_vistos[] = $num;
+        $catalogo_limpio[] = basename($arch);
+    }
 }
 file_put_contents($archivo_catalogo, json_encode($catalogo_limpio));
 // ---------------------------------------------------
@@ -165,7 +174,7 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Lunae - <?php echo $_SESSION['usuario']; ?></title>
-    <link rel="icon" type="image/png" href="fiveicon.png?v=4">
+    <link rel="icon" type="image/png" href="fiveicon.png?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; color: #333333; padding: 10px; text-align: center; margin: 0; }

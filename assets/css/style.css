@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #fdfaf0; /* El nuevo tono crema elegante */
+    background-color: #fdfaf0; 
     color: #333333;
     min-height: 100vh;
 }
@@ -10,7 +10,7 @@ body {
 .encabezado-lujo {
     text-align: center;
     padding: 30px 20px;
-    background-color: #fdfaf0; /* Integrado al fondo */
+    background-color: #fdfaf0; 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     border-bottom: 2px solid #B76E79; 
 }
@@ -55,7 +55,16 @@ body {
     }
 }
 
-.contenedor-joya { position: relative; }
+/* --- ANIMACIÓN CSS FLUIDA Y SEGURA PARA CELULARES --- */
+.contenedor-joya { 
+    position: relative; 
+    animation: aparecerSuave 0.6s ease forwards;
+}
+
+@keyframes aparecerSuave {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 .foto-joya {
     width: 100%;
@@ -124,7 +133,7 @@ body {
     text-align: center;
     padding: 30px 20px;
     margin-top: 40px;
-    background-color: #fdfaf0; /* Integrado al fondo */
+    background-color: #fdfaf0; 
     border-top: 1px solid #eeeeee;
 }
 
@@ -134,7 +143,7 @@ body {
     position: fixed;
     bottom: 20px; 
     right: 20px;
-    background-color: #ffffff; /* Se mantiene blanco para que resalte */
+    background-color: #ffffff; 
     border: 2px solid #D4AF37;
     padding: 10px 20px; 
     border-radius: 50px;
@@ -192,17 +201,6 @@ body {
 
 #cerrar-carrito:hover {
     color: #D4AF37; 
-}
-
-/* --- ANIMACIÓN DE CARGA SUAVE (FADE IN) --- */
-.contenedor-joya { 
-    opacity: 0; 
-    transform: translateY(20px); 
-    transition: opacity 0.6s ease, transform 0.6s ease; 
-}
-.contenedor-joya.visible { 
-    opacity: 1; 
-    transform: translateY(0); 
 }
 
 /* --- DISEÑO DEL FILTRO (SWITCH) --- */

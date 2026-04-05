@@ -1,46 +1,45 @@
 document.addEventListener("DOMContentLoaded", () => {
-    fetch('assets/js/datos.json?t=' + new Date().getTime())
-        .then(respuesta => respuesta.json())
-        .then(datosServer => {
+    
+    // Obtenemos en paralelo las ventas y el nuevo índice de fotos ultra-rápido
+    Promise.all([
+        fetch('assets/js/datos.json?t=' + new Date().getTime()).then(res => res.json()),
+        fetch('assets/js/catalogo.json?t=' + new Date().getTime()).then(res => res.ok ? res.json() : [])
+    ])
+    .then(([datosServer, catalogoArchivos]) => {
             
-            const maxFotosPosibles = 200; 
             const contenedor = document.getElementById('contenedor-galeria');
+            contenedor.innerHTML = ''; // Limpiamos la galería por si acaso
+            
             let carritoDeCompras = []; 
             
-            // Elementos del UI
+            // Elementos de la interfaz
             const carritoFlotante = document.getElementById('carrito-flotante');
             const contadorCarrito = document.getElementById('contador-carrito');
             const btnWhatsapp = document.getElementById('btn-whatsapp');
             const btnCerrarCarrito = document.getElementById('cerrar-carrito'); 
             const toggleFiltro = document.getElementById('filtro-disponibles');
             
-            // Elementos del Visor
             const visor = document.getElementById('visor-lightbox');
             const imgVisor = document.getElementById('img-visor');
             const btnCerrarVisor = document.getElementById('cerrar-visor');
             const btnAgregarVisor = document.getElementById('btn-visor-agregar');
             let joyaActualEnVisor = 0;
 
+            // EL NÚMERO DE TU MAMÁ
             const numeroTelefono = "527711395823"; 
 
-            // Datos del Servidor (Ocultas y Vendidas)
-            // Si el servidor solo mandó un array simple (versión vieja), lo adaptamos.
             let joyasVendidas = Array.isArray(datosServer) ? datosServer : (datosServer.vendidas || []);
             let joyasOcultas = datosServer.ocultas || [];
+            
+            // --- NUEVO: Memoria anti-duplicados ---
+            let joyasYaRenderizadas = []; 
 
-            // --- ANIMACIÓN DE ENTRADA (LAZY LOAD SUAVE) ---
-            const observadorCarga = new IntersectionObserver((entradas) => {
-                entradas.forEach(entrada => {
-                    if (entrada.isIntersecting) {
-                        entrada.target.classList.add('visible');
-                        observadorCarga.unobserve(entrada.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            for (let i = 1; i <= maxFotosPosibles; i++) {
-                // Si tu mamá la marcó como oculta, no la dibujamos
-                if(joyasOcultas.includes(i)) continue;
+            catalogoArchivos.forEach(nombreArchivo => {
+                let i = parseInt(nombreArchivo.split('.')[0]); 
+                
+                // Evitamos duplicados y saltamos las ocultas
+                if(joyasOcultas.includes(i) || joyasYaRenderizadas.includes(i)) return; 
+                joyasYaRenderizadas.push(i);
 
                 let cajaJoya = document.createElement('div');
                 cajaJoya.className = 'contenedor-joya';
@@ -49,18 +48,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 imagen.className = 'foto-joya';
                 imagen.alt = `Joya número ${i}`;
                 imagen.dataset.numero = i; 
-                imagen.src = `assets/img/${i}.jpg`; 
+                imagen.src = `assets/img/${nombreArchivo}`; 
                 
-                imagen.onerror = function() {
-                    if (this.src.endsWith('.jpg')) { this.src = `assets/img/${i}.jpeg`; } 
-                    else if (this.src.endsWith('.jpeg')) { this.src = `assets/img/${i}.png`; } 
-                    else { cajaJoya.style.display = 'none'; }
-                };
+                // --- NUEVO: Carga inteligente nativa (No falla en celulares) ---
+                imagen.loading = 'lazy'; 
 
                 const esVendida = joyasVendidas.includes(i);
 
                 if (esVendida) {
-                    cajaJoya.classList.add('es-vendida'); // Para el filtro
+                    cajaJoya.classList.add('es-vendida'); 
                     imagen.classList.add('agotada');
                     let letrero = document.createElement('div');
                     letrero.className = 'letrero-vendida';
@@ -68,10 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     cajaJoya.appendChild(imagen);
                     cajaJoya.appendChild(letrero);
                 } else {
-                    cajaJoya.classList.add('es-disponible'); // Para el filtro
+                    cajaJoya.classList.add('es-disponible'); 
                     cajaJoya.appendChild(imagen);
                     
-                    // --- NUEVA LÓGICA: ABRIR VISOR AL TOCAR FOTO ---
                     imagen.addEventListener('click', function() {
                         const numeroJoya = parseInt(this.dataset.numero);
                         abrirVisor(this.src, numeroJoya);
@@ -79,8 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 contenedor.appendChild(cajaJoya);
-                observadorCarga.observe(cajaJoya); // Animación
-            }
+            });
 
             // --- LÓGICA DEL VISOR ---
             function abrirVisor(rutaImg, numero) {
@@ -88,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 joyaActualEnVisor = numero;
                 visor.classList.remove('oculto');
                 
-                // Checar si ya estaba en el carrito
                 if (carritoDeCompras.includes(numero)) {
                     btnAgregarVisor.innerText = "Quitar de la selección";
                     btnAgregarVisor.classList.add('ya-agregado');
@@ -101,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
             btnCerrarVisor.addEventListener('click', () => { visor.classList.add('oculto'); });
             visor.addEventListener('click', (e) => { if(e.target === visor) visor.classList.add('oculto'); });
 
-            // Botón de agregar dentro del visor
             btnAgregarVisor.addEventListener('click', () => {
                 const num = joyaActualEnVisor;
                 const imgEnGaleria = document.querySelector(`img[data-numero='${num}']`);
@@ -153,5 +145,5 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.open(linkWhatsapp, '_blank');
             });
             
-        }).catch(error => console.error("Error cargando los datos:", error));
+    }).catch(error => console.error("Error cargando los datos:", error));
 });
