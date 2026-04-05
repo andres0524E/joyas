@@ -91,7 +91,7 @@ if (isset($_POST['subir_catalogo'])) {
             $ext = pathinfo($nombre_original, PATHINFO_EXTENSION);
 
             if ($tmp != "") {
-                // SI ES UN ZIP (De la herramienta de PC)
+                // SI ES UN ZIP (De la herramienta Convertidor)
                 if ($ext === 'zip') {
                     $zip = new ZipArchive;
                     if ($zip->open($tmp) === TRUE) {
@@ -200,6 +200,9 @@ $joyas_ocultas = $datos_actuales['ocultas'] ?? [];
     <div class="tarjeta">
         <h3>1. Subir Nuevo Catálogo</h3>
         <p>Puedes seleccionar fotos sueltas o <b>subir directamente el archivo .zip</b> que te da tu Optimizador. <br><b>⚠️ Borrará el catálogo anterior.</b></p>
+        
+        <a href="convertidor.html" target="_blank" style="display: inline-block; background-color: #fdfaf0; color: #D4AF37; border: 1px solid #D4AF37; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-bottom: 20px; font-family: 'Montserrat', sans-serif; transition: 0.3s;" onmouseover="this.style.backgroundColor='#D4AF37'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#fdfaf0'; this.style.color='#D4AF37';">✨ Abrir Convertidor Mágico</a>
+
         <form action="admin.php" method="POST" enctype="multipart/form-data" onsubmit="document.getElementById('indicador-carga').style.display='block';">
             <input type="file" name="fotos[]" multiple accept="image/*, .zip" required style="margin-bottom:15px; width:100%;">
             <br>

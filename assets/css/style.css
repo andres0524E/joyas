@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #ffffff;
+    background-color: #fdfaf0; /* El nuevo tono crema elegante */
     color: #333333;
     min-height: 100vh;
 }
@@ -10,7 +10,7 @@ body {
 .encabezado-lujo {
     text-align: center;
     padding: 30px 20px;
-    background-color: #ffffff;
+    background-color: #fdfaf0; /* Integrado al fondo */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     border-bottom: 2px solid #B76E79; 
 }
@@ -124,7 +124,7 @@ body {
     text-align: center;
     padding: 30px 20px;
     margin-top: 40px;
-    background-color: #ffffff;
+    background-color: #fdfaf0; /* Integrado al fondo */
     border-top: 1px solid #eeeeee;
 }
 
@@ -134,7 +134,7 @@ body {
     position: fixed;
     bottom: 20px; 
     right: 20px;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Se mantiene blanco para que resalte */
     border: 2px solid #D4AF37;
     padding: 10px 20px; 
     border-radius: 50px;
@@ -181,7 +181,6 @@ body {
 
 #btn-whatsapp:hover { background-color: #D4AF37; }
 
-/* --- DISEÑO DEL BOTÓN DE CANCELAR (X) --- */
 #cerrar-carrito {
     cursor: pointer;
     color: #B76E79; 
@@ -194,7 +193,8 @@ body {
 #cerrar-carrito:hover {
     color: #D4AF37; 
 }
-/* --- NUEVO: ANIMACIÓN DE CARGA SUAVE (FADE IN) --- */
+
+/* --- ANIMACIÓN DE CARGA SUAVE (FADE IN) --- */
 .contenedor-joya { 
     opacity: 0; 
     transform: translateY(20px); 
@@ -205,7 +205,7 @@ body {
     transform: translateY(0); 
 }
 
-/* --- NUEVO: DISEÑO DEL FILTRO (SWITCH) --- */
+/* --- DISEÑO DEL FILTRO (SWITCH) --- */
 .controles-galeria { margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .texto-filtro { color: #666; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -216,7 +216,7 @@ body {
 input:checked + .slider { background-color: #D4AF37; }
 input:checked + .slider:before { transform: translateX(18px); }
 
-/* --- NUEVO: VISOR DE IMÁGENES (LIGHTBOX) --- */
+/* --- VISOR DE IMÁGENES (LIGHTBOX) --- */
 #visor-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 10, 0.95); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.3s; backdrop-filter: blur(5px);}
 #visor-lightbox.oculto { opacity: 0; pointer-events: none; }
 

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizador de Fotos - Lunae</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS VISUALES LUNAE --- */
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfaf0; color: #333; text-align: center; padding: 30px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        
+        h1 { font-family: 'Cinzel', serif; color: #D4AF37; font-size: 3.5em; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 4px; }
+        p { color: #B76E79; font-size: 1.3em; margin: 0 0 40px; font-weight: 300; letter-spacing: 2px; }
+        
+        .tarjeta { background: white; padding: 50px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); max-width: 650px; width: 100%; border: 1px solid #D4AF37; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;}
+        
+        /* --- ZONA DE ARRASTRE Y SELECCIÓN --- */
+        .zona-arrastre { border: 3px dashed #B76E79; padding: 50px; border-radius: 10px; background-color: #fafafa; cursor: pointer; transition: 0.3s; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;}
+        .zona-arrastre:hover { background-color: #f0e6e8; border-color: #D4AF37; }
+        
+        .icono-camara { font-size: 5em; color: #aaaaaa; margin-bottom: 20px; transition: color 0.3s;}
+        .zona-arrastre:hover .icono-camara { color: #D4AF37; }
+        
+        .instrucciones { font-family: 'Montserrat', sans-serif; font-weight: 600; color: #B76E79; font-size: 1.1em; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; display: block;}
+        .detalles { color: #888; font-size: 0.9em; display: block; }
+
+        input[type="file"] { display: none; }
+        
+        /* --- BOTÓN DE LUJO --- */
+        .btn-lujo { background-color: #D4AF37; color: white; padding: 18px 36px; border: none; border-radius: 6px; font-size: 1.2em; font-weight: 700; cursor: pointer; transition: background-color 0.3s, transform 0.3s; width: 100%; font-family: 'Montserrat', sans-serif; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); text-transform: uppercase; letter-spacing: 2px;}
+        .btn-lujo:hover { background-color: #B76E79; transform: scale(1.03); }
+        .btn-lujo:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+        
+        /* --- ESTADOS Y BARRA DE PROGRESO --- */
+        #estado { margin-top: 25px; font-weight: 600; color: #666; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px;}
+        
+        progress { width: 100%; height: 25px; margin-top: 15px; display: none; appearance: none; border: none; background-color: #eee; border-radius: 4px; overflow: hidden;}
+        progress::-webkit-progress-bar { background-color: #eee; border-radius: 4px;}
+        progress::-webkit-progress-value { background-color: #D4AF37; border-radius: 4px; transition: width 0.3s;}
+        progress::-moz-progress-bar { background-color: #D4AF37; border-radius: 4px;}
+        
+        /* Efecto al arrastrar sobre la zona */
+        .zona-arrastre.arrastrando { background-color: #f0e6e8; border-color: #D4AF37; }
+    </style>
+</head>
+<body>
+
+    <h1>Lunae - Estudio</h1>
+    <p>Optimizador Mágico de Fotos</p>
+
+    <div class="tarjeta">
+        <label class="zona-arrastre" for="selector-archivos" id="zona-arrastre">
+            <span class="icono-camara">📸</span>
+            <span class="instrucciones">Haz clic aquí</span>
+            <span class="detalles">O arrastra tu carpeta de joyas adentro</span>
+        </label>
+        
+        <input type="file" id="selector-archivos" multiple webkitdirectory directory accept="image/jpeg, image/png, image/jpg">
+
+        <button id="btn-convertir" class="btn-lujo" disabled>Convertir Catálogo</button>
+        
+        <progress id="barra-progreso" value="0" max="100"></progress>
+        <div id="estado">Esperando carpeta...</div>
+    </div>
+
+    <script>
+        const selector = document.getElementById('selector-archivos');
+        const btnConvertir = document.getElementById('btn-convertir');
+        const estado = document.getElementById('estado');
+        const progreso = document.getElementById('barra-progreso');
+        const zonaArrastre = document.getElementById('zona-arrastre');
+        let archivosSeleccionados = [];
+
+        // --- LÓGICA DE DETECCION DE CARPETA ---
+        selector.addEventListener('change', (e) => {
+            procesarSeleccion(Array.from(e.target.files));
+        });
+
+        // Lógica para el drag & drop
+        zonaArrastre.addEventListener('dragover', (e) => { e.preventDefault(); zonaArrastre.classList.add('arrastrando'); });
+        zonaArrastre.addEventListener('dragleave', (e) => { e.preventDefault(); zonaArrastre.classList.remove('arrastrando'); });
+        zonaArrastre.addEventListener('drop', (e) => { 
+            e.preventDefault(); 
+            zonaArrastre.classList.remove('arrastrando');
+            
+            const items = e.dataTransfer.items;
+            if (items) {
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i].webkitGetAsEntry();
+                    if (item && item.isDirectory) {
+                        estado.innerText = "Leyendo carpeta, por favor espera...";
+                        leerCarpeta(item);
+                        return; // Asumimos que arrastró una sola carpeta
+                    }
+                }
+                estado.innerText = "Error: Por favor, arrastra una CARPETA, no archivos sueltos.";
+                estado.style.color = "red";
+            }
+        });
+
+        function procesarSeleccion(archivos) {
+            // Filtramos solo las imágenes válidas
+            archivosSeleccionados = archivos.filter(archivo => {
+                const ext = archivo.name.split('.').pop().toLowerCase();
+                return ['jpg', 'jpeg', 'png'].includes(ext);
+            });
+
+            if (archivosSeleccionados.length > 0) {
+                estado.innerText = `${archivosSeleccionados.length} fotos de joyas listas para convertir.`;
+                estado.style.color = "#666";
+                btnConvertir.disabled = false;
+            } else {
+                estado.innerText = "No se encontraron fotos (JPG/PNG) en la carpeta.";
+                estado.style.color = "red";
+                btnConvertir.disabled = true;
+            }
+        }
+
+        // Función recursiva para leer el contenido de una carpeta arrastrada
+        function leerCarpeta(item, path) {
+            path = path || "";
+            const dirReader = item.createReader();
+            dirReader.readEntries((entries) => {
+                let archivosTemp = [];
+                entries.forEach((entry) => {
+                    if (entry.isFile) {
+                        entry.file((file) => { archivosTemp.push(file); });
+                    } else if (entry.isDirectory) {
+                        leerCarpeta(entry, path + entry.name + "/");
+                    }
+                });
+                // Un truco para esperar a que termine la lectura asíncrona
+                setTimeout(() => { 
+                    if(path === "") procesarSeleccion(archivosTemp); 
+                }, 500); 
+            });
+        }
+
+        // ==========================================
+        // PROCESO DE CONVERSIÓN Y EMPAQUETADO ZIP
+        // ==========================================
+        btnConvertir.addEventListener('click', async () => {
+            btnConvertir.disabled = true;
+            progreso.style.display = 'block';
+            progreso.max = archivosSeleccionados.length;
+            progreso.value = 0;
+            
+            const zip = new JSZip(); 
+            let contadorFinalizadas = 0;
+
+            estado.innerText = "Iniciando conversión de catálogo... ¡No cierres esta ventana!";
+
+            for (let i = 0; i < archivosSeleccionados.length; i++) {
+                const archivoOriginal = archivosSeleccionados[i];
+                try {
+                    const blobWebP = await convertirAWebP(archivoOriginal);
+                    // Le ponemos de nombre 1.webp, 2.webp... listo para tu panel PHP
+                    zip.file((i + 1) + ".webp", blobWebP); 
+                    
+                    contadorFinalizadas++;
+                    progreso.value = contadorFinalizadas;
+                    estado.innerText = `Procesando: ${contadorFinalizadas} de ${archivosSeleccionados.length} joyas...`;
+                } catch (error) {
+                    console.error("Error con una foto", error);
+                }
+            }
+
+            estado.innerText = "¡Conversión finalizada! Empaquetando catálogo...";
+            estado.style.color = "#D4AF37";
+            
+            // Generar el archivo ZIP final y descargarlo automáticamente
+            zip.generateAsync({type:"blob"}).then(function(contenidoZip) {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(contenidoZip);
+                link.download = "Lunae_Fotos_Optimizadas.zip";
+                link.click();
+                
+                estado.innerText = "¡Descarga completada! Sube el archivo .zip a tu panel PHP.";
+                estado.style.color = "#D4AF37";
+                btnConvertir.innerText = "Completado";
+            });
+        });
+
+        // --- LA MAGIA: CONVERSIÓN A WEBP USANDO CANVAS HTML5 ---
+        function convertirAWebP(archivo) {
+            return new Promise((resolver, rechazar) => {
+                const lector = new FileReader();
+                lector.onload = function(evento) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Reducimos el tamaño de fotos gigantes (max 1200px) para ahorrar espacio
+                        let ancho = img.width;
+                        let alto = img.height;
+                        const maxDimension = 1200; 
+
+                        if (ancho > maxDimension || alto > maxDimension) {
+                            if (ancho > alto) { alto = Math.round((alto *= maxDimension / ancho)); ancho = maxDimension; } 
+                            else { ancho = Math.round((ancho *= maxDimension / alto)); alto = maxDimension; }
+                        }
+
+                        canvas.width = ancho; canvas.height = alto;
+                        ctx.drawImage(img, 0, 0, ancho, alto);
+                        
+                        // Exportamos como WEBP con una calidad excelente (80%)
+                        canvas.toBlob((blob) => { resolver(blob); }, 'image/webp', 0.8);
+                    };
+                    img.onerror = rechazar;
+                    img.src = evento.target.result;
+                };
+                lector.onerror = rechazar;
+                lector.readAsDataURL(archivo);
+            });
+        }
+    </script>
+</body>
+</html>
