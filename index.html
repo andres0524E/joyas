@@ -16,7 +16,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -24,6 +23,14 @@
     <header class="encabezado-lujo">
         <h1>Lunae</h1>
         <p>“Luz en cada detalle”</p>
+        
+        <div class="controles-galeria">
+            <label class="switch-filtro">
+                <input type="checkbox" id="filtro-disponibles">
+                <span class="slider"></span>
+            </label>
+            <span class="texto-filtro">Ver solo joyas disponibles</span>
+        </div>
     </header>
     
     <main>
@@ -39,6 +46,12 @@
         <span id="cerrar-carrito" title="Cancelar selección">✖</span>
         <p><strong id="contador-carrito">0</strong> Joyas seleccionadas</p>
         <button id="btn-whatsapp">Cotizar por WhatsApp</button>
+    </div>
+
+    <div id="visor-lightbox" class="oculto">
+        <span id="cerrar-visor">✖</span>
+        <img id="img-visor" src="" alt="Joya en detalle">
+        <button id="btn-visor-agregar">Seleccionar esta joya</button>
     </div>
 
     <script src="assets/js/script.js" charset="UTF-8"></script>
